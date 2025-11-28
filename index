@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TapeTally v2</title>
+  
+  <!-- PWA Integration -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#111827">
+  <link rel="apple-touch-icon" href="https://em-content.zobj.net/source/apple/391/martial-arts-uniform_1f94b.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TapeTally">
+  
+  <!-- ZXing barcode library -->
+  <script src="https://unpkg.com/@zxing/library@0.20.0"></script>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="fatal">Front-end script failed to load.</div>
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <div class="tiny">Loading...</div>
+  </div>
+
+  <header>
+    <div class="row">
+      <b>TapeTally v2</b>
+      <input
+        id="initials"
+        placeholder="Your initials (e.g., MD)"
+        style="width:160px"
+        autocomplete="off"
+      />
+      <button id="signInBtn">Sign In</button>
+      <button id="settingsBtn" class="ghost">⚙️ Settings</button>
+      <button id="scanBtn" class="ghost">📷 Scan</button>
+      <button id="historyBtn" class="ghost">📋 History</button>
+      <span class="tiny" id="status">Booting...</span>
+    </div>
+
+    <div class="row" style="margin-top:8px;position:relative">
+      <select
+        id="loc"
+        title="Location"
+        style="min-width:140px"
+        aria-label="Select location"
+      ></select>
+      <input
+        id="searchActive"
+        placeholder="Search ACTIVE (first/last/ID)..."
+        style="flex:1;min-width:240px"
+        aria-label="Search active students"
+      />
+      <div id="suggest" role="listbox"></div>
+    </div>
+  </header>
+
+  <div class="row" style="margin-top:6px;position:relative">
+    <input
+      id="searchInactive"
+      placeholder="Search INACTIVE to reactivate..."
+      style="flex:1;min-width:240px"
+      aria-label="Search inactive students"
+    />
+    <div id="suggestInactive" role="listbox"></div>
+  </div>
+
+  <div style="margin-top:8px">
+    💡 Tip: Add students with search or scan their ID to get started
+    <label style="float:right">
+      <input type="checkbox" id="bulkMode" /> Bulk Select Mode
+    </label>
+  </div>
+
+  <div id="studentCard" style="display:none"></div>
+  <div id="tapeGrid"></div>
+
+  <div style="margin-top:12px;text-align:center">
+    <button id="logTapesBtn" class="primary">Log Tapes</button>
+    <button id="clearAllBtn">Clear All</button>
+    <span id="tapeCounter" style="margin-left:12px">0 tape picks pending</span>
+  </div>
+
+  <div class="priority-section">
+    <h3>🔥 Priority <button id="refreshPriority" class="ghost" style="font-size:12px">🔄</button></h3>
+    <p style="margin:0 0 8px 0;color:#6b7280;font-size:13px">Based on days since last Cycle Tape.</p>
+    <div id="priorityList"></div>
+  </div>
+
+  <div class="recent-section">
+    <h3>📊 Recent Activity</h3>
+    <div id="recentActivity"></div>
+  </div>
+
+  <!-- App Configuration -->
+  <script>
+    // Your Apps Script Web App URL
+    const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbxOLZ3FuFxTyiYICL9HBqBK7cpVjyiDnmvG7bsCuBP1KKv4n7EA_tUOrVnKpougI0QyDQ/exec';
+  </script>
+
+  <!-- Main App -->
+  <script src="app.js"></script>
+
+  <!-- PWA Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js')
+          .then(function(reg) {
+            console.log('[PWA] Service Worker registered:', reg.scope);
+          })
+          .catch(function(err) {
+            console.log('[PWA] Service Worker registration failed:', err);
+          });
+      });
+    }
+
+    // Online/Offline detection
+    window.addEventListener('online', function() {
+      var status = document.getElementById('status');
+      if (status && status.textContent.includes('Offline')) {
+        status.textContent = 'Ready';
+        status.style.color = '';
+      }
+    });
+
+    window.addEventListener('offline', function() {
+      var status = document.getElementById('status');
+      if (status) {
+        status.textContent = 'Offline - No Connection';
+        status.style.color = '#ef4444';
+      }
+    });
+  </script>
+</body>
+</html>
