@@ -1,0 +1,27 @@
+{
+  "name": "TapeTally v2",
+  "short_name": "TapeTally",
+  "description": "Martial Arts Belt Tracking System for World Martial Arts Academy",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#111827",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://em-content.zobj.net/source/apple/391/martial-arts-uniform_1f94b.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://em-content.zobj.net/source/apple/391/martial-arts-uniform_1f94b.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "education", "productivity"],
+  "screenshots": [],
+  "shortcuts": []
+}
