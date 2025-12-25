@@ -42,37 +42,44 @@ const DOM = {
   refreshPriority: null
 };
 
-// API Helper - calls your Apps Script backend
-async function callBackend(functionName, ...args) {
-  try {
-    const response = await fetch(BACKEND_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        function: functionName,
-        args: args
-      })
+// API Helper - calls your Apps Script backend using JSONP (no CORS issues)
+function callBackend(functionName, ...args) {
+  return new Promise((resolve, reject) => {
+    const callbackName = 'jsonp_callback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    // Create callback function
+    window[callbackName] = function(response) {
+      delete window[callbackName];
+      document.body.removeChild(script);
+      
+      if (response.error) {
+        reject(new Error(response.error));
+      } else {
+        resolve(response.result);
+      }
+    };
+    
+    // Build URL with parameters
+    const params = new URLSearchParams({
+      action: functionName,
+      args: JSON.stringify(args),
+      callback: callbackName
     });
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    const url = BACKEND_URL + '?' + params.toString();
     
-    const data = await response.json();
+    // Create script tag for JSONP
+    const script = document.createElement('script');
+    script.src = url;
+    script.onerror = function() {
+      delete window[callbackName];
+      document.body.removeChild(script);
+      reject(new Error('Failed to load script'));
+    };
     
-    if (data.error) {
-      throw new Error(data.error);
-    }
-    
-    return data.result;
-  } catch (error) {
-    console.error('Backend call failed:', error);
-    throw error;
-  }
+    document.body.appendChild(script);
+  });
 }
-
 // Initialize DOM references
 function initDOM() {
   DOM.initials = document.getElementById("initials");
